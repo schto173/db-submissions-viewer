@@ -154,7 +154,7 @@
     return t;
   }
 
-  var HEAD = 30, ROW = 18, PADX = 10, PADB = 8;
+  var HEAD = 45, ROW = 20, PADX = 14, PADB = 10, MINW = 178;
 
   function layoutClass(c, view) {
     var title = className(c, view);
@@ -172,8 +172,8 @@
       if (view === 'physical') { typeW = Math.max(typeW, measure(r.type, FONT_S)); consW = Math.max(consW, measure(r.cons, FONT_S)); }
     });
     var inner = view === 'physical' ? nameW + (typeW ? 18 + typeW : 0) + (consW ? 18 + consW : 0) : nameW;
-    var w = Math.ceil(Math.max(130, measure(title, FONT_B) + 2 * PADX + 4, inner + 2 * PADX));
-    var h = HEAD + Math.max(attrs.length, 0) * ROW + (attrs.length ? PADB : 4);
+    var w = Math.ceil(Math.max(MINW, measure(title, FONT_B) + 2 * PADX + 4, inner + 2 * PADX));
+    var h = HEAD + attrs.length * ROW + PADB;
     return { title: title, rows: attrs, w: w, h: h, nameW: nameW, typeW: typeW, consW: consW };
   }
 
@@ -191,7 +191,7 @@
   function anchor(box, side, attrId, offset) {
     side = side || 'right';
     if (attrId && box.rowIndex[attrId] !== undefined && (side === 'left' || side === 'right')) {
-      var ry = box.y + HEAD + box.rowIndex[attrId] * ROW + ROW / 2 + 1;
+      var ry = box.y + HEAD + box.rowIndex[attrId] * ROW + ROW / 2;
       return { x: side === 'left' ? box.x : box.x + box.w, y: ry, side: side };
     }
     offset = offset || 0;
@@ -203,46 +203,115 @@
     }
   }
 
-  function route(p1, p2, style, cps) {
-    var G = 18;
-    if (cps && cps.length) return [p1].concat(cps.map(function (c) { return { x: +c.x, y: +c.y }; })).concat([p2]);
-    if (style === 'straight') return [p1, p2];
-    var d1 = DIRS[p1.side] || [1, 0], d2 = DIRS[p2.side] || [-1, 0];
-    var q1 = { x: p1.x + d1[0] * G, y: p1.y + d1[1] * G }, q2 = { x: p2.x + d2[0] * G, y: p2.y + d2[1] * G };
-    var h1 = d1[0] !== 0, h2 = d2[0] !== 0;
-    var pts = [p1, q1];
-    if (h1 && h2) {
-      var x;
-      if (d1[0] === d2[0]) x = d1[0] > 0 ? Math.max(q1.x, q2.x) : Math.min(q1.x, q2.x);
-      else x = (q1.x + q2.x) / 2;
-      pts.push({ x: x, y: q1.y }, { x: x, y: q2.y });
-    } else if (!h1 && !h2) {
-      var y;
-      if (d1[1] === d2[1]) y = d1[1] > 0 ? Math.max(q1.y, q2.y) : Math.min(q1.y, q2.y);
-      else y = (q1.y + q2.y) / 2;
-      pts.push({ x: q1.x, y: y }, { x: q2.x, y: y });
-    } else if (h1) {
-      pts.push({ x: q2.x, y: q1.y });
+  // React Flow floating-edge helpers (getNodeIntersection / getEdgePosition)
+  function borderPoint(b, tx, ty) {
+    var w = b.w / 2, h = b.h / 2, x2 = b.x + w, y2 = b.y + h;
+    var xx1 = (tx - x2) / (2 * w) - (ty - y2) / (2 * h);
+    var yy1 = (tx - x2) / (2 * w) + (ty - y2) / (2 * h);
+    var a = 1 / ((Math.abs(xx1) + Math.abs(yy1)) || 1);
+    var xx3 = a * xx1, yy3 = a * yy1;
+    return { x: w * (xx3 + yy3) + x2, y: h * (-xx3 + yy3) + y2 };
+  }
+  function sideAt(b, p) {
+    var px = Math.round(p.x), py = Math.round(p.y), nx = Math.round(b.x), ny = Math.round(b.y);
+    if (px <= nx + 1) return 'left';
+    if (px >= nx + b.w - 1) return 'right';
+    if (py <= ny + 1) return 'top';
+    if (py >= b.y + b.h - 1) return 'bottom';
+    return 'top';
+  }
+  function floatingEnds(s, t, off) {
+    var p1 = borderPoint(s, t.x + t.w / 2, t.y + t.h / 2), p2 = borderPoint(t, s.x + s.w / 2, s.y + s.h / 2);
+    p1.side = sideAt(s, p1); p2.side = sideAt(t, p2);
+    if (off) [p1, p2].forEach(function (p) { if (p.side === 'left' || p.side === 'right') p.y += off; else p.x += off; });
+    return [p1, p2];
+  }
+
+  // Orthogonal routing = React Flow's "smooth step" algorithm (getSmoothStepPath),
+  // which Modelizer uses, so lines leave and enter classes the same way.
+  var STEP_OFFSET = 20;
+  function stepPoints(src, tgt) {
+    var sd = { x: (DIRS[src.side] || [1, 0])[0], y: (DIRS[src.side] || [1, 0])[1] };
+    var td = { x: (DIRS[tgt.side] || [-1, 0])[0], y: (DIRS[tgt.side] || [-1, 0])[1] };
+    var off = STEP_OFFSET;
+    var sg = { x: src.x + sd.x * off, y: src.y + sd.y * off };
+    var tg = { x: tgt.x + td.x * off, y: tgt.y + td.y * off };
+    var dir = (src.side === 'left' || src.side === 'right') ? { x: sg.x < tg.x ? 1 : -1, y: 0 } : { x: 0, y: sg.y < tg.y ? 1 : -1 };
+    var acc = dir.x !== 0 ? 'x' : 'y', opp = acc === 'x' ? 'y' : 'x';
+    var cur = dir[acc];
+    var points, cx, cy;
+    var sOff = { x: 0, y: 0 }, tOff = { x: 0, y: 0 };
+    if (sd[acc] * td[acc] === -1) {
+      // opposite handles (e.g. right -> left)
+      cx = (src.x + tgt.x) / 2; cy = (src.y + tgt.y) / 2;
+      var vSplit = [{ x: cx, y: sg.y }, { x: cx, y: tg.y }];
+      var hSplit = [{ x: sg.x, y: cy }, { x: tg.x, y: cy }];
+      if (sd[acc] === cur) points = acc === 'x' ? vSplit : hSplit;
+      else points = acc === 'x' ? hSplit : vSplit;
     } else {
-      pts.push({ x: q1.x, y: q2.y });
+      var sourceTarget = [{ x: sg.x, y: tg.y }];
+      var targetSource = [{ x: tg.x, y: sg.y }];
+      if (acc === 'x') points = sd.x === cur ? targetSource : sourceTarget;
+      else points = sd.y === cur ? sourceTarget : targetSource;
+      if (src.side === tgt.side) {
+        var diff = Math.abs(src[acc] - tgt[acc]);
+        if (diff <= off) {
+          var gapOffset = Math.min(off - 1, off - diff);
+          if (sd[acc] === cur) sOff[acc] = (sg[acc] > src[acc] ? -1 : 1) * gapOffset;
+          else tOff[acc] = (tg[acc] > tgt[acc] ? -1 : 1) * gapOffset;
+        }
+      } else {
+        // mixed handles (e.g. right -> bottom)
+        var isSameDir = sd[acc] === td[opp];
+        var sGt = sg[opp] > tg[opp], sLt = sg[opp] < tg[opp];
+        var flip = (sd[acc] === 1 && ((!isSameDir && sGt) || (isSameDir && sLt))) || (sd[acc] !== 1 && ((!isSameDir && sLt) || (isSameDir && sGt)));
+        if (flip) points = acc === 'x' ? sourceTarget : targetSource;
+      }
+      var sp = { x: sg.x + sOff.x, y: sg.y + sOff.y }, tp = { x: tg.x + tOff.x, y: tg.y + tOff.y };
+      var mx = Math.max(Math.abs(sp.x - points[0].x), Math.abs(tp.x - points[0].x));
+      var my = Math.max(Math.abs(sp.y - points[0].y), Math.abs(tp.y - points[0].y));
+      if (mx >= my) { cx = (sp.x + tp.x) / 2; cy = points[0].y; } else { cx = points[0].x; cy = (sp.y + tp.y) / 2; }
     }
-    pts.push(q2, p2);
-    // drop zero-length / collinear points
-    var out = [pts[0]];
+    var pts = [src, { x: sg.x + sOff.x, y: sg.y + sOff.y }].concat(points).concat([{ x: tg.x + tOff.x, y: tg.y + tOff.y }, tgt]);
+    return { pts: pts, center: { x: cx, y: cy } };
+  }
+
+  function route(p1, p2, style, cps) {
+    var res;
+    if (cps && cps.length) res = { pts: [p1].concat(cps.map(function (c) { return { x: +c.x, y: +c.y }; })).concat([p2]) };
+    else if (style === 'straight') res = { pts: [p1, p2], center: { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 } };
+    else res = stepPoints(p1, p2);
+    // drop zero-length points and merge straight runs (but keep direction reversals)
+    var pts = res.pts, out = [pts[0]];
     for (var i = 1; i < pts.length; i++) {
       var a = out[out.length - 1], b = pts[i];
       if (Math.abs(a.x - b.x) < 0.5 && Math.abs(a.y - b.y) < 0.5) continue;
       if (out.length >= 2) {
         var z = out[out.length - 2];
-        if ((Math.abs(z.x - a.x) < 0.5 && Math.abs(a.x - b.x) < 0.5) || (Math.abs(z.y - a.y) < 0.5 && Math.abs(a.y - b.y) < 0.5)) { out[out.length - 1] = b; continue; }
+        var vert = Math.abs(z.x - a.x) < 0.5 && Math.abs(a.x - b.x) < 0.5 && (a.y - z.y) * (b.y - a.y) > 0;
+        var hor = Math.abs(z.y - a.y) < 0.5 && Math.abs(a.y - b.y) < 0.5 && (a.x - z.x) * (b.x - a.x) > 0;
+        if (vert || hor) { out[out.length - 1] = b; continue; }
       }
       out.push(b);
     }
+    out.center = res.center || null;
     return out;
   }
 
   function pathD(pts) {
     return pts.map(function (p, i) { return (i ? 'L' : 'M') + p.x.toFixed(1) + ' ' + p.y.toFixed(1); }).join(' ');
+  }
+
+  // where React Flow puts the edge label; falls back to the middle of the path
+  function labelPoint(pts) {
+    var c = pts.center;
+    if (!c) return midpoint(pts);
+    for (var i = 1; i < pts.length; i++) {
+      var a = pts[i - 1], b = pts[i];
+      if (Math.abs(a.y - b.y) < 0.5 && Math.abs(c.y - a.y) < 0.5 && c.x >= Math.min(a.x, b.x) - 0.5 && c.x <= Math.max(a.x, b.x) + 0.5) return { x: c.x, y: c.y, horizontal: true };
+      if (Math.abs(a.x - b.x) < 0.5 && Math.abs(c.x - a.x) < 0.5 && c.y >= Math.min(a.y, b.y) - 0.5 && c.y <= Math.max(a.y, b.y) + 0.5) return { x: c.x, y: c.y, horizontal: false };
+    }
+    return midpoint(pts);
   }
 
   function midpoint(pts) {
@@ -262,10 +331,10 @@
   function endLabelPos(p, line) {
     // place near an endpoint, beside the first segment
     switch (p.side) {
-      case 'left': return { x: p.x - 6, y: p.y - 5 - line * 12, anchor: 'end' };
+      case 'left': return { x: p.x - 6, y: p.y + 14 + line * 12, anchor: 'end' };
       case 'top': return { x: p.x + 6, y: p.y - 6 - line * 12, anchor: 'start' };
       case 'bottom': return { x: p.x + 6, y: p.y + 14 + line * 12, anchor: 'start' };
-      default: return { x: p.x + 6, y: p.y - 5 - line * 12, anchor: 'start' };
+      default: return { x: p.x + 6, y: p.y + 14 + line * 12, anchor: 'start' };
     }
   }
 
@@ -313,10 +382,10 @@
         box.g = g;
         el('rect', { x: 0, y: 0, width: L.w, height: L.h, rx: 5, class: 'dg-box' }, g);
         el('path', { d: 'M0 6 v-1 a5 5 0 0 1 5 -5 h' + (L.w - 10) + ' a5 5 0 0 1 5 5 v1 z', fill: c.color, class: 'dg-cap' }, g);
-        text(g, PADX, 21, L.title, { class: 'dg-title' });
-        if (L.rows.length) el('line', { x1: 0, x2: L.w, y1: HEAD - 2, y2: HEAD - 2, class: 'dg-sep' }, g);
+        text(g, PADX, 27, L.title, { class: 'dg-title' });
+        if (L.rows.length) el('line', { x1: 0, x2: L.w, y1: HEAD - 7, y2: HEAD - 7, class: 'dg-sep' }, g);
         L.rows.forEach(function (r, i) {
-          var y = HEAD + i * ROW + 13;
+          var y = HEAD + i * ROW + 14;
           var rowG = el('g', { class: 'dg-row' + (r.pk ? ' is-pk' : '') + (r.fk ? ' is-fk' : ''), 'data-attr': r.a.id }, g);
           el('rect', { x: 1, y: HEAD + i * ROW, width: L.w - 2, height: ROW, class: 'dg-rowbg' }, rowG);
           var tt = el('title', null, rowG);
@@ -347,29 +416,14 @@
 
       var paths = {};
       if (view === 'conceptual') {
-        // several associations on the same side of a class: spread their ends along
-        // that side (ordered by where the other class is) so labels do not pile up
-        var ends = {};
-        model.associations.forEach(function (a) {
-          var s0 = boxes[a.source], t0 = boxes[a.target];
-          if (!s0 || !t0 || s0 === t0) return;
-          [[a, 'src', s0, t0, parseHandle(a.sourceHandle).side || guessSide(s0, t0)], [a, 'tgt', t0, s0, parseHandle(a.targetHandle).side || guessSide(t0, s0)]].forEach(function (x) {
-            var key = x[2].cls.id + '|' + x[4];
-            (ends[key] = ends[key] || []).push({ a: x[0], end: x[1], other: x[3], side: x[4] });
-          });
-        });
-        var endOff = {};
-        Object.keys(ends).forEach(function (k) {
-          var list = ends[k];
-          var horiz = list[0].side === 'top' || list[0].side === 'bottom';
-          list.sort(function (p, q) { return horiz ? (p.other.x + p.other.w / 2) - (q.other.x + q.other.w / 2) : (p.other.y + p.other.h / 2) - (q.other.y + q.other.h / 2); });
-          list.forEach(function (e, i) { endOff[e.a.id + e.end] = (i - (list.length - 1) / 2) * 22; });
-        });
         model.associations.forEach(function (a) {
           var s = boxes[a.source], t = boxes[a.target];
           if (!s || !t) return;
-          var hs = parseHandle(a.sourceHandle), ht = parseHandle(a.targetHandle);
-          var p1 = anchor(s, hs.side || guessSide(s, t), null, endOff[a.id + 'src'] || 0), p2 = anchor(t, ht.side || guessSide(t, s), null, endOff[a.id + 'tgt'] || 0);
+          // Modelizer draws associations as React Flow "floating" edges: the stored
+          // handle sides are ignored, the ends sit where the centre-to-centre line
+          // crosses each box border
+          var fl = floatingEnds(s, t, (a.parallelIndex - (a.parallelCount - 1) / 2) * 16);
+          var p1 = fl[0], p2 = fl[1];
           var pts = s === t ? selfLoop(s) : route(p1, p2, a.lineStyle, a.controlPoints);
           if (s === t) { p1 = pts[0]; p2 = pts[pts.length - 1]; }
           paths[a.id] = pts;
@@ -378,7 +432,7 @@
           el('path', { d: pathD(pts), class: 'dg-line' }, g);
           if (a.comment) { var ttl = el('title', null, g); ttl.textContent = a.comment; }
           var lg = el('g', { class: 'dg-elabels', 'data-s': a.source, 'data-t': a.target, 'data-eid': a.id }, gLabels);
-          var mid = midpoint(pts);
+          var mid = labelPoint(pts);
           if (a.name) text(lg, mid.x, mid.y + (mid.horizontal ? -6 : 4), a.name, { class: 'dg-aname', 'text-anchor': mid.horizontal ? 'middle' : 'start', dx: mid.horizontal ? 0 : 6 });
           var la = endLabelPos(p1, 0), lb = endLabelPos(p2, 0);
           if (a.multA) text(lg, la.x, la.y, a.multA, { class: 'dg-mult', 'text-anchor': la.anchor });
@@ -391,9 +445,8 @@
           var targetEdge = (a.target || '').replace(/^assoc-edge-/, '');
           var pts = paths[targetEdge];
           if (!s || !pts) return;
-          var mid = midpoint(pts);
-          var hs = parseHandle(a.sourceHandle);
-          var p1 = anchor(s, hs.side || 'top');
+          var mid = labelPoint(pts);
+          var p1 = borderPoint(s, mid.x, mid.y);
           var g = el('g', { class: 'dg-edge dg-associative', 'data-s': a.source }, gEdges);
           el('path', { d: 'M' + p1.x + ' ' + p1.y + ' L' + mid.x + ' ' + mid.y, class: 'dg-line dg-dashed' }, g);
         });
