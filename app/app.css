@@ -519,3 +519,9 @@ a.rule-ex:hover { color: var(--accent-text); }
 .topbar-right { display: flex; align-items: center; }
 .progress.indeterminate .progress-bar { width: 35%; animation: indet 1.2s ease-in-out infinite; }
 @keyframes indet { 0% { margin-left: -35%; } 100% { margin-left: 100%; } }
+
+/* start page: two ways in */
+.hero-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; max-width: 900px; }
+.hero-row .hero { max-width: none; margin: 0; }
+.hero-note { grid-column: 1 / -1; margin: 0; }
+.s-title .s-files { margin-left: auto; display: flex; align-items: center; gap: 8px; }

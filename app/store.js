@@ -83,8 +83,12 @@
         if (keys.length === 1 && keys[0] !== '\u0000file' && !MOODLE_RE.test(keys[0])) files.forEach(function (f) { f.parts.shift(); });
         else break;
       }
+      // not a Moodle export (no student folders / names): treat the whole zip as
+      // one student's submission
+      var single = !files.some(function (f) { return MOODLE_RE.test(f.parts[0]) || (f.parts.length === 1 && FLAT_RE.test(f.parts[0])); });
+      if (single) files.forEach(function (f) { f.parts = [safeFolder(title)].concat(f.parts.length > 1 ? [f.parts.join('_')] : f.parts); });
       // flat layout: Name_123_assignsubmission_file_<file>  ->  folder per student
-      files.forEach(function (f) {
+      if (!single) files.forEach(function (f) {
         if (f.parts.length === 1) {
           var m = FLAT_RE.exec(f.parts[0]);
           if (m && !MOODLE_RE.test(f.parts[0])) f.parts = [m[1], m[2]];
@@ -125,7 +129,7 @@
       return next().then(function () {
         onProgress('Saving…');
         var index = buildIndex(records);
-        var ws = { id: id, title: title, created: new Date().toISOString(), count: index.length, students: index };
+        var ws = { id: id, title: title, created: new Date().toISOString(), count: index.length, students: index, single: single };
         return tx(['workspaces', 'files'], 'readwrite', function (t) {
           t.objectStore('workspaces').put(ws);
           var fs = t.objectStore('files');
@@ -160,7 +164,7 @@
   function listWorkspaces() {
     return tx(['workspaces'], 'readonly', function (t) { return req(t.objectStore('workspaces').getAll()); })
       .then(function (p) { return p; }).then(function (list) {
-        return (list || []).map(function (w) { return { id: w.id, title: w.title, count: w.count, created: w.created }; })
+        return (list || []).map(function (w) { return { id: w.id, title: w.title, count: w.count, created: w.created, single: !!w.single }; })
           .sort(function (a, b) { return b.created.localeCompare(a.created); });
       });
   }
@@ -173,7 +177,7 @@
       if (!ws) throw new Error('Workspace not found');
       var blobs = {};
       (files || []).forEach(function (r) { blobs[r.path] = r.blob; });
-      return { id: ws.id, title: ws.title, students: ws.students, blobs: blobs };
+      return { id: ws.id, title: ws.title, students: ws.students, blobs: blobs, single: !!ws.single };
     });
   }
   function removeWorkspace(id) {
@@ -187,5 +191,44 @@
   function getSetting(key) { return tx(['settings'], 'readonly', function (t) { return req(t.objectStore('settings').get(key)); }).then(function (p) { return p; }); }
   function setSetting(key, value) { return tx(['settings'], 'readwrite', function (t) { if (value === undefined) t.objectStore('settings').delete(key); else t.objectStore('settings').put(value, key); }); }
 
-  root.Store = { importZip: importZip, listWorkspaces: listWorkspaces, getWorkspace: getWorkspace, removeWorkspace: removeWorkspace, getSetting: getSetting, setSetting: setSetting, typeFor: typeFor };
+  // ---------------------------------------------------- single submission
+  // A workspace with one student whose files are added (and removed) one by one.
+  function safeFolder(n) { return (String(n || '').replace(/[\\/:*?"<>|]+/g, ' ').replace(/^[_.\s]+/, '').trim() || 'Submission').slice(0, 80); }
+  function fileRecords(wsId, folder, fileList) {
+    var when = new Date().toISOString().slice(0, 16);
+    return Array.prototype.map.call(fileList, function (f) {
+      var name = String(f.name).split(/[\\/]/).pop() || 'file';
+      return { ws: wsId, path: folder + '/' + name, blob: new Blob([f], { type: typeFor(name) }), modified: when };
+    });
+  }
+  function rebuild(wsId, mutate) {
+    return tx(['workspaces', 'files'], 'readwrite', function (t) {
+      var wsStore = t.objectStore('workspaces'), fs = t.objectStore('files');
+      mutate(fs);
+      req(wsStore.get(wsId)).then(function (ws) {
+        req(fs.index('ws').getAll(wsId)).then(function (records) {
+          ws.students = buildIndex(records);
+          ws.count = ws.students.length;
+          wsStore.put(ws);
+        });
+      });
+    });
+  }
+  function createSingle(name, fileList) {
+    var folder = safeFolder(name);
+    var id = 'single-' + Date.now().toString(36);
+    var ws = { id: id, title: folder, created: new Date().toISOString(), count: 0, students: [], single: true };
+    return tx(['workspaces'], 'readwrite', function (t) { t.objectStore('workspaces').put(ws); })
+      .then(function () { return addFiles(id, folder, fileList); })
+      .then(function () { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () {}); return { id: id, student: folder }; });
+  }
+  function addFiles(wsId, folder, fileList) {
+    var recs = fileRecords(wsId, safeFolder(folder), fileList);
+    return rebuild(wsId, function (fs) { recs.forEach(function (r) { fs.put(r); }); });
+  }
+  function removeFile(wsId, path) {
+    return rebuild(wsId, function (fs) { fs.delete([wsId, path]); });
+  }
+
+  root.Store = { createSingle: createSingle, addFiles: addFiles, removeFile: removeFile, importZip: importZip, listWorkspaces: listWorkspaces, getWorkspace: getWorkspace, removeWorkspace: removeWorkspace, getSetting: getSetting, setSetting: setSetting, typeFor: typeFor };
 })(window);

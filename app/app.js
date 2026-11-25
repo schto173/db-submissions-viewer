@@ -348,12 +348,14 @@
       if (gen !== S.gen) return;
       revokeUrls();
       Object.keys(ws.blobs).forEach(function (p) { S.urls[p] = URL.createObjectURL(ws.blobs[p]); });
-      S.index = { title: ws.title, students: ws.students };
+      S.index = { title: ws.title, students: ws.students, single: ws.single };
       S.students = ws.students; S.byId = {};
       S.students.forEach(function (s) { s._loading = null; s.data = null; S.byId[s.id] = s; });
       document.title = ws.title + ' · DB submissions viewer';
       renderSidebar();
-      if (!keepRoute && location.hash !== '#/' && location.hash !== '') location.hash = '#/'; else route();
+      var target = keepRoute === 'student' || (!keepRoute && ws.single && S.students.length === 1) ? studentHref(S.students[0].id, 'review') : '#/';
+      if (typeof keepRoute === 'string' && keepRoute !== 'student') target = keepRoute;
+      if (keepRoute === true || location.hash === target) route(); else location.hash = target;
       var queue = S.students.slice();
       var worker = function () {
         var st = queue.shift();
@@ -376,7 +378,7 @@
 
   // --------------------------------------------------------------- import
   function uploadZip(file) {
-    if (!/\.zip$/i.test(file.name)) { alert('Please choose a .zip file (Moodle → "Download all submissions").'); return; }
+    if (!/\.zip$/i.test(file.name)) { addSingleFiles([file]); return; }
     var main = document.getElementById('main');
     destroyControllers(); S.shell = null;
     main.innerHTML = '';
@@ -400,9 +402,44 @@
     window.addEventListener('drop', function (e) {
       if (!hasFile(e)) return;
       e.preventDefault(); depth = 0; ov.hidden = true;
-      var f = e.dataTransfer.files[0];
-      if (f) uploadZip(f);
+      var files = Array.prototype.slice.call(e.dataTransfer.files);
+      if (!files.length) return;
+      // one zip = class import (or a zipped single submission); loose files = single submission
+      if (files.length === 1 && /\.zip$/i.test(files[0].name) && !(curWs() && curWs().single)) uploadZip(files[0]);
+      else addSingleFiles(files);
     });
+  }
+
+  function curWs() { return S.workspaces.filter(function (w) { return w.id === S.ws; })[0] || null; }
+
+  // ----------------------------------------------------- single submission
+  // Files dropped or chosen while a single submission is open are added to it;
+  // otherwise a new single submission is started.
+  function pickSingleFiles(forceNew) {
+    var inp = h('input', { type: 'file', multiple: true, accept: '.json,.mdlz,.sql,.pdf,.png,.jpg,.jpeg,.zip,.txt' });
+    inp.addEventListener('change', function () { if (inp.files.length) addSingleFiles(Array.prototype.slice.call(inp.files), forceNew); });
+    inp.click();
+  }
+  function addSingleFiles(files, forceNew) {
+    var ws = curWs();
+    var job;
+    if (ws && ws.single && !forceNew && S.students[0]) {
+      job = Store.addFiles(ws.id, S.students[0].id, files).then(function () { return { id: ws.id }; });
+    } else {
+      var name = prompt('Name for this submission (e.g. the student\'s name):', 'My submission');
+      if (name === null) return;
+      job = Store.createSingle(name, files);
+    }
+    job.then(function (res) {
+      return Store.listWorkspaces().then(function (list) { S.workspaces = list; return openWorkspace(res.id, 'student'); });
+    }).catch(function (e) { alert('Could not add the files: ' + e.message); });
+  }
+  function removeSingleFile(path) {
+    var ws = curWs();
+    if (!ws || !confirm('Remove ' + path.split('/').pop() + ' from this submission?')) return;
+    Store.removeFile(ws.id, path).then(function () {
+      return Store.listWorkspaces().then(function (list) { S.workspaces = list; return openWorkspace(ws.id, location.hash); });
+    }).catch(function (e) { alert('Could not remove the file: ' + e.message); });
   }
 
   // ============================================================== sidebar
@@ -461,10 +498,16 @@
   // ============================================================= overview
   function importHero() {
     var fileIn = document.getElementById('import-file');
-    return h('div', { class: 'card hero', onclick: function () { fileIn.click(); } },
-      h('div', { class: 'hero-icon' }, '⭱'),
-      h('h2', null, 'Import the Moodle submissions zip'),
-      h('div', { class: 'muted' }, 'In Moodle open the assignment → “View all submissions” → “Download all submissions”. Drop that zip here or click to choose it. It is extracted on this computer only.'));
+    return h('div', { class: 'hero-row' },
+      h('div', { class: 'card hero', onclick: function () { fileIn.click(); } },
+        h('div', { class: 'hero-icon' }, '⭱'),
+        h('h2', null, 'Whole class: Moodle zip'),
+        h('div', { class: 'muted' }, 'In Moodle open the assignment → “View all submissions” → “Download all submissions”. Drop that zip here or click to choose it.')),
+      h('div', { class: 'card hero', onclick: function () { pickSingleFiles(true); } },
+        h('div', { class: 'hero-icon' }, '＋'),
+        h('h2', null, 'One submission: single files'),
+        h('div', { class: 'muted' }, 'Check one student’s work: add the Modelizer file (.json / .mdlz), the .sql dump and the PDF – all at once or one by one.')),
+      h('p', { class: 'faint small hero-note' }, 'Everything stays in this browser; nothing is uploaded.'));
   }
 
   function renderOverview() {
@@ -481,6 +524,7 @@
       h('div', { class: 'grow' }),
       S.ws
         ? h('button', { class: 'btn danger', onclick: removeWorkspace, title: 'Delete this imported workspace (your zip file is not touched)' }, '🗑 Remove this import') : null,
+      h('button', { class: 'btn', onclick: function () { pickSingleFiles(true); } }, '＋ Check one submission'),
       h('button', { class: 'btn', onclick: function () { document.getElementById('import-file').click(); } }, '⭱ Import another zip')));
     var stats = h('div', { class: 'stat-strip', id: 'ov-summary' });
     page.appendChild(stats);
@@ -605,7 +649,10 @@
         h('a', { class: 'btn icon-btn', href: next ? studentHref(next.id, S.ui.lastTab) : null, title: next ? 'Next: ' + next.name + ' (J)' : '' }, '›'),
         h('h1', null, st.name),
         st.moodleId ? h('span', { class: 'faint' }, '#' + st.moodleId) : null,
-        h('span', { class: 'faint small' }, (idx + 1) + ' / ' + S.students.length)),
+        S.students.length > 1 ? h('span', { class: 'faint small' }, (idx + 1) + ' / ' + S.students.length) : null,
+        S.index && S.index.single ? h('div', { class: 's-files' },
+          h('button', { class: 'btn small primary', onclick: function () { pickSingleFiles(false); }, title: 'Add more files to this submission (a file with the same name is replaced)' }, '＋ Add files'),
+          h('span', { class: 'faint small' }, 'or drop files anywhere')) : null),
       h('div', { class: 'tabs' }, tabLinks));
     var body = h('div', { class: 's-body' });
     return { id: st.id, root: h('div', { class: 'student' }, h('div', { class: 'student-main' }, head, body)), body: body, tabLinks: tabLinks };
@@ -1169,7 +1216,8 @@
         h('td', null, h('div', { class: 'row' },
           openTab[f.kind] ? h('a', { class: 'btn small', href: studentHref(st.id, openTab[f.kind], (f.kind === 'pdf' || f.kind === 'image' ? 'd=' : 'f=') + idx) }, 'View') : null,
           h('a', { class: 'btn small', href: fileUrl(f.path), target: '_blank' }, 'Raw'),
-          h('a', { class: 'btn small', href: fileUrl(f.path), download: f.name.split('/').pop() }, 'Download')))));
+          h('a', { class: 'btn small', href: fileUrl(f.path), download: f.name.split('/').pop() }, 'Download'),
+          S.index && S.index.single ? h('button', { class: 'btn small danger', onclick: function () { removeSingleFile(f.path); } }, 'Remove') : null))));
     });
     body.appendChild(h('div', { class: 'page' }, h('div', { class: 'card' }, h('table', { class: 'grid' }, h('thead', null, h('tr', null, h('th', null, 'File'), h('th', null, 'Type'), h('th', { class: 'num' }, 'Size'), h('th', null, 'Modified'), h('th', null, ''))), tb))));
   }

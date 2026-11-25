@@ -23,6 +23,15 @@ Each student has these tabs:
 
 Switch all findings off and on with the **Findings** switch in the top bar (or **F**).
 
+## Check a single submission
+
+On the start page choose **One submission: single files** (or **＋ Check one submission**
+on the overview). Add the Modelizer file (`.json` / `.mdlz`), the `.sql` dump and the PDF,
+all at once or one by one with **＋ Add files** or drag & drop. A file with the same name
+replaces the old one, and **Files → Remove** takes one out again. A zip with one student's
+files (not a Moodle export) also works. Students can use this to check their own work
+before handing it in.
+
 ## Your own assignment
 
 The repository comes with the model solution and user story of the
@@ -32,5 +41,5 @@ The repository comes with the model solution and user story of the
 
 ## Privacy
 
-The zip is unpacked **inside your browser** and stored only there (IndexedDB). Nothing
-is uploaded, not even when you use the GitHub Pages link. **🗑 Remove** deletes an import again.
+Zips and files are opened **inside your browser** and stored only there (IndexedDB).
+Nothing is uploaded, not even when you use the GitHub Pages link. **🗑 Remove** deletes an import again.
