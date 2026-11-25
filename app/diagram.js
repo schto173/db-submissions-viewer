@@ -347,12 +347,29 @@
 
       var paths = {};
       if (view === 'conceptual') {
+        // several associations on the same side of a class: spread their ends along
+        // that side (ordered by where the other class is) so labels do not pile up
+        var ends = {};
+        model.associations.forEach(function (a) {
+          var s0 = boxes[a.source], t0 = boxes[a.target];
+          if (!s0 || !t0 || s0 === t0) return;
+          [[a, 'src', s0, t0, parseHandle(a.sourceHandle).side || guessSide(s0, t0)], [a, 'tgt', t0, s0, parseHandle(a.targetHandle).side || guessSide(t0, s0)]].forEach(function (x) {
+            var key = x[2].cls.id + '|' + x[4];
+            (ends[key] = ends[key] || []).push({ a: x[0], end: x[1], other: x[3], side: x[4] });
+          });
+        });
+        var endOff = {};
+        Object.keys(ends).forEach(function (k) {
+          var list = ends[k];
+          var horiz = list[0].side === 'top' || list[0].side === 'bottom';
+          list.sort(function (p, q) { return horiz ? (p.other.x + p.other.w / 2) - (q.other.x + q.other.w / 2) : (p.other.y + p.other.h / 2) - (q.other.y + q.other.h / 2); });
+          list.forEach(function (e, i) { endOff[e.a.id + e.end] = (i - (list.length - 1) / 2) * 22; });
+        });
         model.associations.forEach(function (a) {
           var s = boxes[a.source], t = boxes[a.target];
           if (!s || !t) return;
           var hs = parseHandle(a.sourceHandle), ht = parseHandle(a.targetHandle);
-          var off = (a.parallelIndex - (a.parallelCount - 1) / 2) * 16;
-          var p1 = anchor(s, hs.side || guessSide(s, t), null, off), p2 = anchor(t, ht.side || guessSide(t, s), null, -off);
+          var p1 = anchor(s, hs.side || guessSide(s, t), null, endOff[a.id + 'src'] || 0), p2 = anchor(t, ht.side || guessSide(t, s), null, endOff[a.id + 'tgt'] || 0);
           var pts = s === t ? selfLoop(s) : route(p1, p2, a.lineStyle, a.controlPoints);
           if (s === t) { p1 = pts[0]; p2 = pts[pts.length - 1]; }
           paths[a.id] = pts;
