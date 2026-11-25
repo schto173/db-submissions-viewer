@@ -1,0 +1,806 @@
+{
+  "version": 1,
+  "modelName": "DB_Musterloesung",
+  "nodes": [
+    {
+      "id": "class-f074da10-6458-46b0-9a01-1c143ad03196",
+      "type": "class",
+      "position": {
+        "x": 146.2023486123186,
+        "y": 96.30339778339982
+      },
+      "data": {
+        "label": "User",
+        "attributes": [
+          {
+            "id": "attr-class-f074da10-6458-46b0-9a01-1c143ad03196-73eaf267-a2ef-4f71-bc86-74c8a2596212",
+            "name": "username",
+            "logicalName": "pk_username",
+            "type": "varchar(n)",
+            "typeParams": {
+              "maxLength": "13",
+              "precision": "",
+              "scale": "",
+              "enumValues": ""
+            },
+            "defaultValue": "",
+            "nullable": true,
+            "unique": false,
+            "autoIncrement": false,
+            "visibility": {
+              "conceptual": true,
+              "logical": true,
+              "physical": true
+            }
+          },
+          {
+            "id": "attr-class-f074da10-6458-46b0-9a01-1c143ad03196-42e72946-5ee1-4d7f-adde-73e2ed8e190e",
+            "name": "email",
+            "logicalName": "",
+            "type": "varchar(n)",
+            "typeParams": {
+              "maxLength": "250",
+              "precision": "",
+              "scale": "",
+              "enumValues": ""
+            },
+            "defaultValue": "",
+            "nullable": false,
+            "unique": true,
+            "autoIncrement": false,
+            "visibility": {
+              "conceptual": true,
+              "logical": true,
+              "physical": true
+            }
+          },
+          {
+            "id": "attr-class-f074da10-6458-46b0-9a01-1c143ad03196-abaf84dc-8c76-4984-b946-01e95888538b",
+            "name": "phoneNumber",
+            "logicalName": "",
+            "type": "varchar(n)",
+            "typeParams": {
+              "maxLength": "25",
+              "precision": "",
+              "scale": "",
+              "enumValues": ""
+            },
+            "defaultValue": "",
+            "nullable": false,
+            "unique": false,
+            "autoIncrement": false,
+            "visibility": {
+              "conceptual": true,
+              "logical": true,
+              "physical": true
+            }
+          },
+          {
+            "id": "attr-class-f074da10-6458-46b0-9a01-1c143ad03196-2b32c7f8-2819-44e7-bd50-21534fa506e5",
+            "name": "password",
+            "logicalName": "",
+            "type": "varchar(n)",
+            "typeParams": {
+              "maxLength": "250",
+              "precision": "",
+              "scale": "",
+              "enumValues": ""
+            },
+            "defaultValue": "",
+            "nullable": false,
+            "unique": false,
+            "autoIncrement": false,
+            "visibility": {
+              "conceptual": true,
+              "logical": true,
+              "physical": true
+            }
+          },
+          {
+            "id": "attr-class-f074da10-6458-46b0-9a01-1c143ad03196-9b524167-e571-4a38-8ea6-2fd715a5d103",
+            "name": "credit",
+            "logicalName": "",
+            "type": "int",
+            "typeParams": {
+              "maxLength": "",
+              "precision": "",
+              "scale": "",
+              "enumValues": ""
+            },
+            "defaultValue": "",
+            "nullable": false,
+            "unique": false,
+            "autoIncrement": false,
+            "visibility": {
+              "conceptual": true,
+              "logical": true,
+              "physical": true
+            }
+          }
+        ],
+        "color": "#ffc107",
+        "visibility": {
+          "conceptual": true,
+          "logical": true,
+          "physical": true
+        },
+        "viewPositions": {
+          "conceptual": {
+            "x": 168.3564082123006,
+            "y": 96.30339778339982
+          },
+          "logical": {
+            "x": 146.2023486123186,
+            "y": 96.30339778339982
+          },
+          "physical": {
+            "x": 146.2023486123186,
+            "y": 96.30339778339982
+          }
+        },
+        "viewPositionsMeta": {
+          "conceptual": true,
+          "logical": true,
+          "physical": false
+        }
+      },
+      "selected": false,
+      "width": 237,
+      "height": 156,
+      "positionAbsolute": {
+        "x": 146.2023486123186,
+        "y": 96.30339778339982
+      },
+      "dragging": false
+    },
+    {
+      "id": "class-69cdfab6-4bf8-4d92-b595-7ba0ff3a87fa",
+      "type": "class",
+      "position": {
+        "x": 707.3289897631598,
+        "y": 99.1790806086793
+      },
+      "data": {
+        "label": "Port",
+        "attributes": [
+          {
+            "id": "attr-class-69cdfab6-4bf8-4d92-b595-7ba0ff3a87fa-7bb8d82b-1116-4b90-97da-6258e6bdb648",
+            "name": "pk_port",
+            "logicalName": "",
+            "type": "int",
+            "typeParams": {
+              "maxLength": "",
+              "precision": "",
+              "scale": "",
+              "enumValues": ""
+            },
+            "defaultValue": "",
+            "nullable": true,
+            "unique": false,
+            "autoIncrement": true,
+            "visibility": {
+              "conceptual": false,
+              "logical": true,
+              "physical": true
+            }
+          },
+          {
+            "id": "attr-class-69cdfab6-4bf8-4d92-b595-7ba0ff3a87fa-23b6a0e4-b174-41c6-80d1-0b95ab20bede",
+            "name": "number",
+            "logicalName": "",
+            "type": "int",
+            "typeParams": {
+              "maxLength": "",
+              "precision": "",
+              "scale": "",
+              "enumValues": ""
+            },
+            "defaultValue": "",
+            "nullable": false,
+            "unique": false,
+            "autoIncrement": false,
+            "visibility": {
+              "conceptual": true,
+              "logical": true,
+              "physical": true
+            }
+          },
+          {
+            "id": "attr-class-69cdfab6-4bf8-4d92-b595-7ba0ff3a87fa-9a26f4c1-ba75-423a-a6ec-36bad80abfba",
+            "name": "fk_chargingStation",
+            "logicalName": "",
+            "type": "int",
+            "typeParams": {
+              "maxLength": "",
+              "precision": "",
+              "scale": "",
+              "enumValues": ""
+            },
+            "defaultValue": "",
+            "nullable": false,
+            "unique": false,
+            "autoIncrement": false,
+            "visibility": {
+              "conceptual": false,
+              "logical": true,
+              "physical": true
+            }
+          }
+        ],
+        "color": "#009688",
+        "visibility": {
+          "conceptual": true,
+          "logical": true,
+          "physical": true
+        },
+        "viewPositions": {
+          "conceptual": {
+            "x": 621.6666259765625,
+            "y": 140.5333251953125
+          },
+          "logical": {
+            "x": 620.9281573232297,
+            "y": 96.22520599534835
+          },
+          "physical": {
+            "x": 707.3289897631598,
+            "y": 99.1790806086793
+          }
+        },
+        "viewPositionsMeta": {
+          "conceptual": true,
+          "logical": true,
+          "physical": true
+        }
+      },
+      "selected": false,
+      "width": 180,
+      "height": 116,
+      "positionAbsolute": {
+        "x": 707.3289897631598,
+        "y": 99.1790806086793
+      },
+      "dragging": false
+    },
+    {
+      "id": "class-aef80d7b-fbd7-4077-82f2-d736a7304d18",
+      "type": "class",
+      "position": {
+        "x": 672.4269340718313,
+        "y": 367.76096012603824
+      },
+      "data": {
+        "label": "ChargingStation",
+        "attributes": [
+          {
+            "id": "attr-class-aef80d7b-fbd7-4077-82f2-d736a7304d18-b8040529-f4c3-4d6c-bf90-fb4ce828f248",
+            "name": "pk_chargingStation",
+            "logicalName": "",
+            "type": "int",
+            "typeParams": {
+              "maxLength": "",
+              "precision": "",
+              "scale": "",
+              "enumValues": ""
+            },
+            "defaultValue": "",
+            "nullable": true,
+            "unique": false,
+            "autoIncrement": true,
+            "visibility": {
+              "conceptual": false,
+              "logical": true,
+              "physical": true
+            }
+          },
+          {
+            "id": "attr-class-aef80d7b-fbd7-4077-82f2-d736a7304d18-6824fbad-7478-4d32-bb61-c5fc17e620e0",
+            "name": "name",
+            "logicalName": "",
+            "type": "varchar(n)",
+            "typeParams": {
+              "maxLength": "50",
+              "precision": "",
+              "scale": "",
+              "enumValues": ""
+            },
+            "defaultValue": "",
+            "nullable": false,
+            "unique": false,
+            "autoIncrement": false,
+            "visibility": {
+              "conceptual": true,
+              "logical": true,
+              "physical": true
+            }
+          },
+          {
+            "id": "attr-class-aef80d7b-fbd7-4077-82f2-d736a7304d18-68b838ee-d169-4eb7-aaa8-e7183a55b495",
+            "name": "description",
+            "logicalName": "",
+            "type": "text",
+            "typeParams": {
+              "maxLength": "",
+              "precision": "",
+              "scale": "",
+              "enumValues": ""
+            },
+            "defaultValue": "",
+            "nullable": false,
+            "unique": false,
+            "autoIncrement": false,
+            "visibility": {
+              "conceptual": true,
+              "logical": true,
+              "physical": true
+            }
+          },
+          {
+            "id": "attr-class-aef80d7b-fbd7-4077-82f2-d736a7304d18-e3e93c13-cf5c-44be-920b-d7d34f2c3e94",
+            "name": "ipAddress",
+            "logicalName": "",
+            "type": "varchar(n)",
+            "typeParams": {
+              "maxLength": "15",
+              "precision": "",
+              "scale": "",
+              "enumValues": ""
+            },
+            "defaultValue": "",
+            "nullable": false,
+            "unique": true,
+            "autoIncrement": false,
+            "visibility": {
+              "conceptual": true,
+              "logical": true,
+              "physical": true
+            }
+          },
+          {
+            "id": "attr-class-aef80d7b-fbd7-4077-82f2-d736a7304d18-81b07dcf-7084-41f0-ab13-ab46bf039fa0",
+            "name": "fk_location",
+            "logicalName": "",
+            "type": "int",
+            "typeParams": {
+              "maxLength": "",
+              "precision": "",
+              "scale": "",
+              "enumValues": ""
+            },
+            "defaultValue": "",
+            "nullable": false,
+            "unique": false,
+            "autoIncrement": false,
+            "visibility": {
+              "conceptual": false,
+              "logical": true,
+              "physical": true
+            }
+          }
+        ],
+        "color": "#ff5722",
+        "visibility": {
+          "conceptual": true,
+          "logical": true,
+          "physical": true
+        },
+        "viewPositions": {
+          "conceptual": {
+            "x": 621.6666259765625,
+            "y": 371.5333251953125
+          },
+          "logical": {
+            "x": 621.6666259765625,
+            "y": 367.84098192864883
+          },
+          "physical": {
+            "x": 672.4269340718313,
+            "y": 367.76096012603824
+          }
+        },
+        "viewPositionsMeta": {
+          "conceptual": true,
+          "logical": true,
+          "physical": true
+        }
+      },
+      "selected": false,
+      "width": 255,
+      "height": 156,
+      "positionAbsolute": {
+        "x": 672.4269340718313,
+        "y": 367.76096012603824
+      },
+      "dragging": false
+    },
+    {
+      "id": "class-a9958233-4a95-40cd-b11e-98f33c5e1b36",
+      "type": "class",
+      "position": {
+        "x": 144.73144311373176,
+        "y": 367.9183614893562
+      },
+      "data": {
+        "label": "Location",
+        "attributes": [
+          {
+            "id": "attr-class-a9958233-4a95-40cd-b11e-98f33c5e1b36-9e41c198-2681-484c-a905-35c4b8b8a609",
+            "name": "pk_location",
+            "logicalName": "",
+            "type": "int",
+            "typeParams": {
+              "maxLength": "",
+              "precision": "",
+              "scale": "",
+              "enumValues": ""
+            },
+            "defaultValue": "",
+            "nullable": true,
+            "unique": false,
+            "autoIncrement": true,
+            "visibility": {
+              "conceptual": false,
+              "logical": true,
+              "physical": true
+            }
+          },
+          {
+            "id": "attr-class-a9958233-4a95-40cd-b11e-98f33c5e1b36-f414c5bf-6f8c-443a-83db-767287550ae3",
+            "name": "name",
+            "logicalName": "",
+            "type": "varchar(n)",
+            "typeParams": {
+              "maxLength": "50",
+              "precision": "",
+              "scale": "",
+              "enumValues": ""
+            },
+            "defaultValue": "",
+            "nullable": false,
+            "unique": false,
+            "autoIncrement": false,
+            "visibility": {
+              "conceptual": true,
+              "logical": true,
+              "physical": true
+            }
+          },
+          {
+            "id": "attr-class-a9958233-4a95-40cd-b11e-98f33c5e1b36-74b2244a-0dd3-41e5-b0e4-d82e3135aaf2",
+            "name": "description",
+            "logicalName": "",
+            "type": "text",
+            "typeParams": {
+              "maxLength": "",
+              "precision": "",
+              "scale": "",
+              "enumValues": ""
+            },
+            "defaultValue": "",
+            "nullable": false,
+            "unique": false,
+            "autoIncrement": false,
+            "visibility": {
+              "conceptual": true,
+              "logical": true,
+              "physical": true
+            }
+          },
+          {
+            "id": "attr-class-a9958233-4a95-40cd-b11e-98f33c5e1b36-cbb251aa-ef3b-4feb-95ac-f0645a5105aa",
+            "name": "photo",
+            "logicalName": "",
+            "type": "varchar(n)",
+            "typeParams": {
+              "maxLength": "250",
+              "precision": "",
+              "scale": "",
+              "enumValues": ""
+            },
+            "defaultValue": "",
+            "nullable": false,
+            "unique": false,
+            "autoIncrement": false,
+            "visibility": {
+              "conceptual": true,
+              "logical": true,
+              "physical": true
+            }
+          }
+        ],
+        "color": "#03a9f4",
+        "visibility": {
+          "conceptual": true,
+          "logical": true,
+          "physical": true
+        },
+        "viewPositions": {
+          "conceptual": {
+            "x": 169.10090867371196,
+            "y": 367.9183614893562
+          },
+          "logical": {
+            "x": 144.73144311373176,
+            "y": 367.9183614893562
+          },
+          "physical": {
+            "x": 144.73144311373176,
+            "y": 367.9183614893562
+          }
+        },
+        "viewPositionsMeta": {
+          "conceptual": true,
+          "logical": true,
+          "physical": true
+        }
+      },
+      "selected": false,
+      "width": 194,
+      "height": 136,
+      "positionAbsolute": {
+        "x": 144.73144311373176,
+        "y": 367.9183614893562
+      },
+      "dragging": false
+    },
+    {
+      "id": "class-70ed76b6-5695-448c-880e-6c98440b8ca1",
+      "type": "class",
+      "position": {
+        "x": 440.3514965861625,
+        "y": 96.33796229343238
+      },
+      "data": {
+        "label": "activates",
+        "attributes": [
+          {
+            "id": "attr-class-70ed76b6-5695-448c-880e-6c98440b8ca1-e819ef68-f3c4-4a42-b223-e151a5afcd63",
+            "name": "pkfk_username",
+            "logicalName": "",
+            "type": "varchar(n)",
+            "typeParams": {
+              "maxLength": "13",
+              "precision": "",
+              "scale": "",
+              "enumValues": ""
+            },
+            "defaultValue": "",
+            "nullable": true,
+            "unique": false,
+            "autoIncrement": false,
+            "visibility": {
+              "conceptual": false,
+              "logical": true,
+              "physical": true
+            }
+          },
+          {
+            "id": "attr-class-70ed76b6-5695-448c-880e-6c98440b8ca1-e729fd13-30c5-4701-8994-b3fa3e55226f",
+            "name": "pkfk_port",
+            "logicalName": "",
+            "type": "int",
+            "typeParams": {
+              "maxLength": "",
+              "precision": "",
+              "scale": "",
+              "enumValues": ""
+            },
+            "defaultValue": "",
+            "nullable": true,
+            "unique": false,
+            "autoIncrement": false,
+            "visibility": {
+              "conceptual": false,
+              "logical": true,
+              "physical": true
+            }
+          },
+          {
+            "id": "attr-class-70ed76b6-5695-448c-880e-6c98440b8ca1-8ce6145f-40b2-4bfd-b8e8-52da9bbe0134",
+            "name": "timestamp",
+            "logicalName": "pk_timestamp",
+            "type": "datetime",
+            "typeParams": {
+              "maxLength": "",
+              "precision": "",
+              "scale": "",
+              "enumValues": ""
+            },
+            "defaultValue": "",
+            "nullable": true,
+            "unique": false,
+            "autoIncrement": false,
+            "visibility": {
+              "conceptual": true,
+              "logical": true,
+              "physical": true
+            }
+          },
+          {
+            "id": "attr-class-70ed76b6-5695-448c-880e-6c98440b8ca1-e56f98d5-0974-40dc-9393-903a7bfb64b9",
+            "name": "duration",
+            "logicalName": "",
+            "type": "int",
+            "typeParams": {
+              "maxLength": "",
+              "precision": "",
+              "scale": "",
+              "enumValues": ""
+            },
+            "defaultValue": "",
+            "nullable": false,
+            "unique": false,
+            "autoIncrement": false,
+            "visibility": {
+              "conceptual": true,
+              "logical": true,
+              "physical": true
+            }
+          }
+        ],
+        "color": "#9c27b0",
+        "visibility": {
+          "conceptual": true,
+          "logical": true,
+          "physical": true
+        },
+        "viewPositions": {
+          "conceptual": {
+            "x": 395.30490873286556,
+            "y": 236.64700642665218
+          },
+          "logical": {
+            "x": 382.01247297287637,
+            "y": 96.33796229343238
+          },
+          "physical": {
+            "x": 440.3514965861625,
+            "y": 96.33796229343238
+          }
+        },
+        "viewPositionsMeta": {
+          "conceptual": true,
+          "logical": true,
+          "physical": true
+        }
+      },
+      "selected": false,
+      "width": 207,
+      "height": 136,
+      "positionAbsolute": {
+        "x": 440.3514965861625,
+        "y": 96.33796229343238
+      },
+      "dragging": false
+    }
+  ],
+  "edges": [
+    {
+      "interactionWidth": 20,
+      "source": "class-f074da10-6458-46b0-9a01-1c143ad03196",
+      "sourceHandle": "right-source",
+      "target": "class-69cdfab6-4bf8-4d92-b595-7ba0ff3a87fa",
+      "targetHandle": "left-target",
+      "type": "association",
+      "data": {
+        "multiplicityA": "0..*",
+        "multiplicityB": "0..*",
+        "name": "activates",
+        "type": "association",
+        "roleA": "",
+        "roleB": "",
+        "parallelIndex": 0,
+        "parallelCount": 1
+      },
+      "id": "edge-fd9b7938-3d46-4738-b3b2-732f05b656a7",
+      "selected": false
+    },
+    {
+      "interactionWidth": 20,
+      "source": "class-70ed76b6-5695-448c-880e-6c98440b8ca1",
+      "sourceHandle": "top-source",
+      "target": "assoc-edge-edge-fd9b7938-3d46-4738-b3b2-732f05b656a7",
+      "targetHandle": "association-target",
+      "type": "associativeAssociation",
+      "data": {
+        "name": "activates",
+        "type": "associative",
+        "autoName": true
+      },
+      "id": "reactflow__edge-class-70ed76b6-5695-448c-880e-6c98440b8ca1top-source-assoc-edge-edge-fd9b7938-3d46-4738-b3b2-732f05b656a7association-target",
+      "selected": false
+    },
+    {
+      "interactionWidth": 20,
+      "source": "class-69cdfab6-4bf8-4d92-b595-7ba0ff3a87fa",
+      "sourceHandle": "bottom-source",
+      "target": "class-aef80d7b-fbd7-4077-82f2-d736a7304d18",
+      "targetHandle": "top-target",
+      "type": "association",
+      "data": {
+        "multiplicityA": "1..*",
+        "multiplicityB": "1..1",
+        "name": "isPartOf",
+        "type": "association",
+        "roleA": "",
+        "roleB": "",
+        "parallelIndex": 0,
+        "parallelCount": 1
+      },
+      "id": "edge-f29bdce0-d8a5-49a6-ab11-188d11a40377",
+      "selected": false
+    },
+    {
+      "interactionWidth": 20,
+      "source": "class-aef80d7b-fbd7-4077-82f2-d736a7304d18",
+      "sourceHandle": "left-source",
+      "target": "class-a9958233-4a95-40cd-b11e-98f33c5e1b36",
+      "targetHandle": "right-target",
+      "type": "association",
+      "data": {
+        "multiplicityA": "1..*",
+        "multiplicityB": "1..1",
+        "name": "houses",
+        "type": "association",
+        "roleA": "",
+        "roleB": "",
+        "parallelIndex": 0,
+        "parallelCount": 1
+      },
+      "id": "edge-35f88644-8af2-4245-b7af-b61f20b9823a",
+      "selected": false
+    },
+    {
+      "interactionWidth": 20,
+      "source": "class-70ed76b6-5695-448c-880e-6c98440b8ca1",
+      "sourceHandle": "left-attr-class-70ed76b6-5695-448c-880e-6c98440b8ca1-e819ef68-f3c4-4a42-b223-e151a5afcd63-source",
+      "target": "class-f074da10-6458-46b0-9a01-1c143ad03196",
+      "targetHandle": "right-attr-class-f074da10-6458-46b0-9a01-1c143ad03196-73eaf267-a2ef-4f71-bc86-74c8a2596212-target",
+      "type": "relationship",
+      "data": {
+        "type": "relationship"
+      },
+      "id": "reactflow__edge-class-70ed76b6-5695-448c-880e-6c98440b8ca1left-attr-class-70ed76b6-5695-448c-880e-6c98440b8ca1-e819ef68-f3c4-4a42-b223-e151a5afcd63-source-class-f074da10-6458-46b0-9a01-1c143ad03196right-attr-class-f074da10-6458-46b0-9a01-1c143ad03196-73eaf267-a2ef-4f71-bc86-74c8a2596212-target",
+      "selected": false
+    },
+    {
+      "interactionWidth": 20,
+      "source": "class-70ed76b6-5695-448c-880e-6c98440b8ca1",
+      "sourceHandle": "right-attr-class-70ed76b6-5695-448c-880e-6c98440b8ca1-e729fd13-30c5-4701-8994-b3fa3e55226f-source",
+      "target": "class-69cdfab6-4bf8-4d92-b595-7ba0ff3a87fa",
+      "targetHandle": "left-attr-class-69cdfab6-4bf8-4d92-b595-7ba0ff3a87fa-7bb8d82b-1116-4b90-97da-6258e6bdb648-target",
+      "type": "relationship",
+      "data": {
+        "type": "relationship"
+      },
+      "id": "reactflow__edge-class-70ed76b6-5695-448c-880e-6c98440b8ca1right-attr-class-70ed76b6-5695-448c-880e-6c98440b8ca1-e729fd13-30c5-4701-8994-b3fa3e55226f-source-class-69cdfab6-4bf8-4d92-b595-7ba0ff3a87faleft-attr-class-69cdfab6-4bf8-4d92-b595-7ba0ff3a87fa-7bb8d82b-1116-4b90-97da-6258e6bdb648-target",
+      "selected": false
+    },
+    {
+      "interactionWidth": 20,
+      "source": "class-69cdfab6-4bf8-4d92-b595-7ba0ff3a87fa",
+      "sourceHandle": "right-attr-class-69cdfab6-4bf8-4d92-b595-7ba0ff3a87fa-9a26f4c1-ba75-423a-a6ec-36bad80abfba-source",
+      "target": "class-aef80d7b-fbd7-4077-82f2-d736a7304d18",
+      "targetHandle": "right-attr-class-aef80d7b-fbd7-4077-82f2-d736a7304d18-b8040529-f4c3-4d6c-bf90-fb4ce828f248-target",
+      "type": "relationship",
+      "data": {
+        "type": "relationship"
+      },
+      "id": "reactflow__edge-class-69cdfab6-4bf8-4d92-b595-7ba0ff3a87faright-attr-class-69cdfab6-4bf8-4d92-b595-7ba0ff3a87fa-9a26f4c1-ba75-423a-a6ec-36bad80abfba-source-class-aef80d7b-fbd7-4077-82f2-d736a7304d18right-attr-class-aef80d7b-fbd7-4077-82f2-d736a7304d18-b8040529-f4c3-4d6c-bf90-fb4ce828f248-target",
+      "selected": false
+    },
+    {
+      "interactionWidth": 20,
+      "source": "class-aef80d7b-fbd7-4077-82f2-d736a7304d18",
+      "sourceHandle": "left-attr-class-aef80d7b-fbd7-4077-82f2-d736a7304d18-81b07dcf-7084-41f0-ab13-ab46bf039fa0-source",
+      "target": "class-a9958233-4a95-40cd-b11e-98f33c5e1b36",
+      "targetHandle": "right-attr-class-a9958233-4a95-40cd-b11e-98f33c5e1b36-9e41c198-2681-484c-a905-35c4b8b8a609-target",
+      "type": "relationship",
+      "data": {
+        "type": "relationship"
+      },
+      "id": "reactflow__edge-class-aef80d7b-fbd7-4077-82f2-d736a7304d18left-attr-class-aef80d7b-fbd7-4077-82f2-d736a7304d18-81b07dcf-7084-41f0-ab13-ab46bf039fa0-source-class-a9958233-4a95-40cd-b11e-98f33c5e1b36right-attr-class-a9958233-4a95-40cd-b11e-98f33c5e1b36-9e41c198-2681-484c-a905-35c4b8b8a609-target",
+      "selected": false
+    }
+  ]
+}

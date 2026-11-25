@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DB submissions viewer</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cellipse cx='16' cy='7' rx='11' ry='4' fill='%232563eb'/%3E%3Cpath d='M5 7v18c0 2.2 4.9 4 11 4s11-1.8 11-4V7c0 2.2-4.9 4-11 4S5 9.2 5 7z' fill='%233b82f6'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="app/app.css">
+</head>
+<body>
+<header class="topbar">
+  <button class="side-toggle" id="side-toggle" title="Show/hide the student list (B)" aria-label="Toggle student list">☰</button>
+  <a class="brand" href="#/">
+    <svg viewBox="0 0 32 32" width="20" height="20" aria-hidden="true"><ellipse cx="16" cy="7" rx="11" ry="4" fill="currentColor" opacity=".9"/><path d="M5 7v18c0 2.2 4.9 4 11 4s11-1.8 11-4V7c0 2.2-4.9 4-11 4S5 9.2 5 7z" fill="currentColor" opacity=".55"/></svg>
+    <span>Submissions</span>
+  </a>
+  <select id="ws-select" class="ws-select" title="Workspace (imported zip)"></select>
+  <button id="ws-remove" class="btn small ws-remove" title="Remove this imported workspace">🗑 Remove</button>
+  <button id="import-btn" class="btn small import-btn" title="Import a Moodle 'Download all submissions' zip">⭱ Import zip</button>
+  <input id="import-file" type="file" accept=".zip,application/zip" hidden>
+  <nav class="topnav">
+    <a href="#/" data-nav="overview">Overview</a>
+    <a href="#/compare" data-nav="compare">Compare</a>
+    <a href="#/ref/story" data-nav="story">User story</a>
+    <a href="#/ref/solution" data-nav="solution">Solution</a>
+    <a href="#/ref/convention" data-nav="convention">Convention</a>
+  </nav>
+  <div class="topbar-right">
+    <label class="findings-switch" title="Show or hide all automatic findings (F)"><input type="checkbox" id="findings-toggle" checked><span class="sw"></span>Findings</label>
+    <span class="kbd-hint">J / K next / previous · 1–6 tabs · B list · F findings</span>
+  </div>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-search"><input id="search" type="search" placeholder="Filter students…" autocomplete="off"></div>
+    <ul id="student-list" class="student-list"></ul>
+  </aside>
+  <main id="main" class="main"><div class="loading">Loading…</div></main>
+</div>
+<div id="drop-overlay" class="drop-overlay" hidden><div>Drop the Moodle zip to import it</div></div>
+<script src="reference/reference.js"></script>
+<script src="app/zip.js"></script>
+<script src="app/store.js"></script>
+<script src="app/sqlparse.js"></script>
+<script src="app/diagram.js"></script>
+<script src="app/checks.js"></script>
+<script src="app/app.js"></script>
+</body>
+</html>
